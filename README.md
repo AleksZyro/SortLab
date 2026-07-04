@@ -1,5 +1,7 @@
 # SortLab
 
+**Deutsch** | [English](./README_EN.md)
+
 SortLab ist ein interaktiver Visualizer für Sortieralgorithmen. Das Projekt zeigt Schritt für Schritt, wie verschiedene Algorithmen ein Array sortieren, und macht Vergleiche, Swaps, Schritte und Laufzeit verständlich sichtbar.
 
 ## Projektstatus
