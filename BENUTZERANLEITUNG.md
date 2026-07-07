@@ -59,8 +59,6 @@ Mit den Preset-Buttons kannst du typische Testfälle schnell laden:
 
 - sortiert
 - umgekehrt
-- Duplikate
-- fast sortiert
 - negative Werte
 
 ### 3. Algorithmus auswählen
@@ -94,15 +92,13 @@ Während der Sortierung zeigt SortLab Statistiken an, zum Beispiel:
 - Vergleiche
 - Bewegungen
 - Schritte
-- Generierungszeit
+- Berechnungs- und Schrittgenerierungszeit
 
 Diese Werte helfen dir zu verstehen, wie aufwendig ein Algorithmus und seine Visualisierung sind.
 
-Der Erklärmodus beschreibt zusätzlich den aktuellen Schritt, zum Beispiel einen Vergleich oder eine Bewegung.
-
 ### 7. Algorithmen vergleichen
 
-Im Vergleichsmodus wählst du einen zweiten Algorithmus aus. Danach berechnet SortLab beide Algorithmen mit demselben Array und zeigt die Werte nebeneinander an.
+Wechsle oben in den Tab **Vergleichsmodus**. Dort wählst du zwei Algorithmen unabhängig von der Simulation aus. Du kannst zusätzlich die Array-Grösse und ein Preset für den Vergleich einstellen. Danach berechnet SortLab beide Algorithmen mit demselben Vergleichs-Array und zeigt die Werte nebeneinander an.
 
 ## Was bedeuten die wichtigsten Begriffe?
 
@@ -122,9 +118,9 @@ Ein Vergleich bedeutet: Der Algorithmus prüft zwei Werte und entscheidet, welch
 
 Eine Bewegung bedeutet: Der Algorithmus verändert das Array. Das kann ein Tausch von zwei Werten sein oder, wie bei Insertion Sort, eine Verschiebung.
 
-### Generierungszeit
+### Berechnungs- und Schrittgenerierungszeit
 
-Die Generierungszeit zeigt, wie lange SortLab gebraucht hat, um die Sortierung zu berechnen und alle Animationsschritte zu erzeugen. Sie ist kein reiner Algorithmus-Benchmark.
+Die Berechnungs- und Schrittgenerierungszeit zeigt, wie lange SortLab gebraucht hat, um die Sortierung zu berechnen und alle Animationsschritte zu erzeugen. Sie ist kein reiner Algorithmus-Benchmark.
 
 ## Empfehlung zum Lernen
 

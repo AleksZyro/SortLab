@@ -2,26 +2,25 @@
 
 [Deutsch](./README.md) | **English**
 
-SortLab is an interactive visualizer for sorting algorithms. It shows step by step how different algorithms sort an array and makes comparisons, movements, animation steps, and step-generation time visible.
+SortLab is an interactive React visualizer for sorting algorithms. It shows how arrays are sorted step by step and makes comparisons, moves, animation steps, and calculation and step-generation time visible.
 
 ## Project Status
 
-Current status: **stable portfolio version**
+Current status: **Stable portfolio version**
 
-This version is intended as a supporting portfolio project. It is functional, tested, and buildable, but intentionally smaller than larger main projects.
+This version is intended as a supporting portfolio project. Tests and production build were run successfully locally.
 
 ## Main Features
 
-- interactive sorting visualization
+- bar visualization for sorting processes
+- separate tabs for visualization and comparison mode
 - random arrays with adjustable size
-- custom array input with validation for integers
-- preset arrays for sorted, reversed, nearly sorted, duplicate, and negative values
+- custom array input with integer validation
+- presets for sorted, reversed, and negative values
 - controllable animation speed
-- color highlighting for comparisons, movements, and sorted values
-- explanation mode with a short description of the current animation step
-- comparison mode for two algorithms on the same array
-- statistics for comparisons, movements, animation steps, and step-generation time
-- short learning section with time complexity and stability
+- color highlighting for comparisons, moves, and sorted values
+- comparison mode with two independently selectable algorithms and its own array size
+- statistics for comparisons, moves, animation steps, and calculation and step-generation time
 
 ## Algorithms
 
@@ -31,24 +30,37 @@ This version is intended as a supporting portfolio project. It is functional, te
 - Quick Sort
 - Heap Sort
 
+## Comparisons And Moves
+
+`Comparisons` counts how often an algorithm compares values.
+
+`Moves` counts operations that change the array. For Bubble Sort, Selection Sort, Quick Sort, and Heap Sort these are real swaps. For Insertion Sort these are shifts and inserting a value into a new position. That is why the metric is not called `swaps`.
+
+## Time Measurement
+
+The displayed time is called **Calculation and step-generation time**. It includes calculating the sorting process and generating the animation steps for the visualization. The values are not scientific benchmarks and depend on the browser, device, and current system state.
+
+## Tech Stack
+
+- React 18
+- Vite 5
+- JavaScript
+- CSS
+- Vitest
+- GitHub Actions
+
 ## Installation
 
 ```bash
 git clone https://github.com/Aleksandros2/SortLab.git
 cd SortLab
-npm install
+npm ci
 ```
 
-## Start
+## Development Start
 
 ```bash
 npm run dev
-```
-
-## Build
-
-```bash
-npm run build
 ```
 
 ## Tests
@@ -57,15 +69,34 @@ npm run build
 npm test
 ```
 
-The tests cover all included sorting algorithms with empty arrays, single-item arrays, already sorted arrays, reverse sorted arrays, duplicate values, and negative values. They also check the movement statistics and custom array input validation.
+Run locally:
 
-Latest local results:
-
-- `npm install`: successful, with 6 reported dependency security advisories
+- `npm ci`: successful
 - `npm test`: successful, 42 tests passed
+
+The tests cover all existing sorting algorithms with an empty array, a single item, already sorted values, reverse sorted values, duplicate values, negative values, correct ascending sorting, and plausible counting of comparisons and moves.
+
+## Production Build
+
+```bash
+npm run build
+```
+
+Run locally:
+
 - `npm run build`: successful, Vite build created
 
-The CI workflow in `.github/workflows/ci.yml` also runs installation, tests, and build on push and pull request.
+## Deployment
+
+GitHub Pages is prepared through `.github/workflows/deploy-pages.yml`. The workflow builds with the base path `/SortLab/`, uploads `dist` as a Pages artifact, and deploys to GitHub Pages.
+
+Planned live demo link:
+
+[https://aleksandros2.github.io/SortLab/](https://aleksandros2.github.io/SortLab/)
+
+For the workflow to deploy, this GitHub setting still needs to be configured manually:
+
+`Settings → Pages → Build and deployment → Source → GitHub Actions`
 
 ## Project Structure
 
@@ -73,7 +104,11 @@ The CI workflow in `.github/workflows/ci.yml` also runs installation, tests, and
 SortLab/
 |- .github/
 |  `- workflows/
-|     `- ci.yml
+|     |- ci.yml
+|     `- deploy-pages.yml
+|- docs/
+|  `- screenshots/
+|     `- sortlab-overview.png
 |- src/
 |  |- App.jsx
 |  |- main.jsx
@@ -84,6 +119,7 @@ SortLab/
 |     |- sortAlgorithms.js
 |     `- sortAlgorithms.test.js
 |- index.html
+|- package-lock.json
 |- package.json
 |- README.md
 `- README_EN.md
@@ -91,42 +127,33 @@ SortLab/
 
 ## Technical Decisions
 
-- React and Vite are used for a simple and fast single-page app.
-- The sorting functions generate animation steps so the UI can display each state.
-- Custom input is validated before it is applied, so only supported integer values are visualized.
-- The statistic `movements` replaces the previous `swaps` label because Insertion Sort shifts values and does not only swap elements.
-- The displayed time is calculation and step-generation time. It is not a pure algorithm benchmark because animation data generation is included.
-- Vitest tests the sorting logic independently from the React interface.
-- GitHub Actions checks tests and build automatically for new changes.
+- The sorting functions generate states for the animation so the UI can display each step.
+- The statistic uses `Moves` because not every algorithm only uses real swaps.
+- The time measurement is not presented as pure algorithm runtime.
+- The tests check the algorithm logic independently from the React interface.
+- GitHub Actions uses Node.js 22 and `npm ci`.
 
 ## Known Limitations
 
-- The displayed time depends on the browser, device, and current system load.
-- The app measures step generation, not pure algorithm runtime.
-- There are no automated UI or screenshot tests yet.
-- The comparison mode compares statistics, but does not animate both algorithms in parallel.
+- The comparison mode shows statistics, but does not animate both algorithms in parallel.
+- The time measurement depends on browser and device.
+- There are no automated UI tests.
+- GitHub Pages is prepared, but the repository setting must be changed manually to GitHub Actions.
 
 ## Screenshot
 
-No screenshot is included in the repository yet.
+The screenshot was created from the built application after successful `npm ci`, `npm test`, and `npm run build`.
 
-Recommendation: A good screenshot should show the desktop view during an active sort, ideally with Quick Sort or Heap Sort, visible bar visualization, statistics, and the algorithm explanation.
+![SortLab overview](docs/screenshots/sortlab-overview.png)
 
-## Demo
+## License Status
 
-No live demo is published at the moment.
+No open-source license has been granted. The source code is publicly viewable, but no additional usage rights are granted.
 
-An optional GitHub Pages or Vercel demo would fit this project. Before publishing, decide whether SortLab should be shown publicly as a supporting portfolio project.
+## Repository Metadata Suggestion
 
-## License
-
-No license is currently defined. No license file was added without an explicit license decision.
-
-## Portfolio Recommendation
-
-- Repository description: `Interactive sorting visualizer with React, Vite, animations, algorithm stats, and Vitest coverage.`
-- GitHub topics: `react`, `vite`, `javascript`, `sorting-algorithms`, `algorithm-visualizer`, `vitest`, `portfolio-project`
-- Positioning: Suitable as a supporting project, especially to show algorithm understanding, state management, and clean documentation.
+- Description: `Interactive React visualizer for comparing sorting algorithms and their operations.`
+- Website: `https://aleksandros2.github.io/SortLab/`
 
 ## User Guide
 
