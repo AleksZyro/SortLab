@@ -8,6 +8,7 @@ const SPEED_MIN = 20;
 const SPEED_MAX = 300;
 const DEFAULT_SIZE = 28;
 const DEFAULT_SPEED = 110;
+const PRIVACY_URL = `${import.meta.env.BASE_URL}privacy.html`;
 
 const algorithmKeys = Object.keys(algorithmMap);
 
@@ -551,6 +552,10 @@ function App() {
           </section>
         </main>
       )}
+      <footer className="app-footer">
+        <span>SortLab verarbeitet keine Formulareingaben und speichert keine personenbezogenen Daten.</span>
+        <a href={PRIVACY_URL}>Datenschutz</a>
+      </footer>
     </div>
   );
 }
