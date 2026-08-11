@@ -2,7 +2,20 @@
 
 **Deutsch** | [English](./README_EN.md)
 
-SortLab ist ein interaktiver React-Visualizer für Sortieralgorithmen. Das Projekt zeigt, wie Arrays schrittweise sortiert werden, und macht Vergleiche, Bewegungen, Animationsschritte und die Berechnungs- und Schrittgenerierungszeit sichtbar.
+SortLab ist ein interaktiver React sorting algorithm visualizer für Bubble Sort, Selection Sort, Insertion Sort, Quick Sort und Heap Sort. Das Projekt zeigt, wie Arrays schrittweise sortiert werden, und macht Vergleiche, Bewegungen, Animationsschritte sowie Berechnungs- und Schrittgenerierungszeit sichtbar.
+
+SortLab ist als algorithm learning tool und Portfolio-Projekt gebaut: Nutzer können Sortierverfahren ausprobieren, eigene Arrays eingeben, negative Werte testen und Algorithmen im Vergleichsmodus gegenüberstellen.
+
+## Suchprofil
+
+Dieses Repository ist relevant für Suchen nach:
+
+- sorting algorithm visualizer
+- React algorithm visualization
+- Bubble Sort, Selection Sort, Insertion Sort, Quick Sort und Heap Sort
+- JavaScript sorting algorithms
+- Vite React portfolio project
+- algorithm learning tool mit Tests und GitHub Pages Demo
 
 ## Projektstatus
 
@@ -156,8 +169,9 @@ Dieses Projekt ist unter der MIT-Lizenz veröffentlicht. Details stehen in [LICE
 
 ## Repository-Metadaten Vorschlag
 
-- Description: `Interactive React visualizer for comparing sorting algorithms and their operations.`
+- Description: `Interactive React sorting algorithm visualizer for Bubble Sort, Quick Sort, Heap Sort and algorithm comparisons.`
 - Website: `https://alekszyro.github.io/SortLab/`
+- Topics: `react`, `sorting-algorithms`, `algorithm-visualizer`, `bubble-sort`, `quick-sort`, `heap-sort`, `vite`, `portfolio-project`
 
 ## Benutzeranleitung
 

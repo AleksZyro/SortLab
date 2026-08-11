@@ -2,7 +2,7 @@
   "name": "sortlab",
   "private": true,
   "version": "0.0.0",
-  "description": "Interactive React visualizer for comparing sorting algorithms and their operations.",
+  "description": "Interactive React sorting algorithm visualizer for Bubble Sort, Quick Sort, Heap Sort and algorithm comparisons.",
   "author": "Aleksandar Nikolic",
   "license": "MIT",
   "repository": {
@@ -10,8 +10,12 @@
     "url": "https://github.com/AleksZyro/SortLab.git"
   },
   "keywords": [
-    "sorting",
-    "visualizer",
+    "sorting-algorithms",
+    "algorithm-visualizer",
+    "bubble-sort",
+    "quick-sort",
+    "heap-sort",
+    "algorithm-comparison",
     "react",
     "vite",
     "portfolio"
