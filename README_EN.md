@@ -28,7 +28,7 @@ This repository is relevant for searches such as:
 
 ## Demo
 
-![SortLab demo](docs/assets/sortlab-demo.gif)
+![SortLab demo](docs/assets/sortlab-demo.webp)
 
 ## Main Features
 
@@ -115,7 +115,7 @@ SortLab/
 |     `- deploy-pages.yml
 |- docs/
 |  `- assets/
-|     |- sortlab-demo.gif
+|     |- sortlab-demo.webp
 |     `- sortlab-demo.png
 |- src/
 |  |- App.jsx
