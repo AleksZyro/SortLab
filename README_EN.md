@@ -6,6 +6,14 @@ SortLab is an interactive React sorting algorithm visualizer for Bubble Sort, Se
 
 SortLab is built as an algorithm learning tool and portfolio project: users can try sorting methods, enter custom arrays, test negative values, and compare algorithms in comparison mode.
 
+## Project identity
+
+This repository is part of the public portfolio of **Aleksandar Nikolić** (**Aleksandar Nikolic**, **AleksZyro**), an IMS student from Buchs AG, Switzerland.
+
+- Portfolio: [aleksandar-nikolic.ch](https://aleksandar-nikolic.ch/)
+- GitHub: [github.com/AleksZyro](https://github.com/AleksZyro)
+- Contact and current availability: [aleksandar-nikolic.ch/#contact](https://aleksandar-nikolic.ch/#contact)
+
 <details>
 <summary>Search profile</summary>
 
