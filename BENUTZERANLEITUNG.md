@@ -14,7 +14,7 @@ Mit SortLab kann man verstehen:
 
 - wie Sortieralgorithmen grundsätzlich funktionieren
 - warum manche Algorithmen schneller sind als andere
-- was Vergleiche und Bewegungen bedeuten
+- was Vergleiche, Schreibzugriffe und Vertauschungen bedeuten
 - wie sich zwei Algorithmen auf demselben Array unterscheiden
 - wie sich ein unsortiertes Array Schritt für Schritt verändert
 
@@ -59,6 +59,7 @@ Mit den Preset-Buttons kannst du typische Testfälle schnell laden:
 
 - sortiert
 - umgekehrt
+- viele Duplikate
 - negative Werte
 
 ### 3. Algorithmus auswählen
@@ -69,13 +70,14 @@ Wähle einen Sortieralgorithmus aus, zum Beispiel:
 Bubble Sort
 Selection Sort
 Insertion Sort
+Merge Sort
 Quick Sort
 Heap Sort
 ```
 
 ### 4. Sortierung starten
 
-Klicke auf den Start-Button.
+Klicke auf **Sortierung starten**. Während der Animation kannst du pausieren, fortsetzen oder den Ablauf zurücksetzen.
 
 Jetzt beginnt SortLab, das Array Schritt für Schritt zu sortieren.
 
@@ -90,15 +92,15 @@ Langsam ist besser zum Lernen. Schnell ist besser, wenn du nur das Ergebnis sehe
 Während der Sortierung zeigt SortLab Statistiken an, zum Beispiel:
 
 - Vergleiche
-- Bewegungen
-- Schritte
-- Berechnungs- und Schrittgenerierungszeit
+- Schreibzugriffe
+- Vertauschungen
+- Generierungszeit
 
 Diese Werte helfen dir zu verstehen, wie aufwendig ein Algorithmus und seine Visualisierung sind.
 
 ### 7. Algorithmen vergleichen
 
-Wechsle oben in den Tab **Vergleichsmodus**. Dort wählst du zwei Algorithmen unabhängig von der Simulation aus. Du kannst zusätzlich die Array-Grösse und ein Preset für den Vergleich einstellen. Danach berechnet SortLab beide Algorithmen mit demselben Vergleichs-Array und zeigt die Werte nebeneinander an.
+Wechsle oben in den Tab **Vergleich**. Wähle zwei Algorithmen und einen gemeinsamen Datensatz. Mit **Vergleich starten** laufen beide Visualisierungen im selben Takt. **Pausieren**, **Fortsetzen** und **Zurücksetzen** wirken auf beide Seiten; die gemeinsame Schrittdauer lässt sich auch während der Wiedergabe ändern. Ein früher fertiger Algorithmus bleibt bei 100 Prozent stehen, während der andere weiterläuft. Jede Seite zeigt Vergleiche, Moves, Schritte und Schreibzugriffe.
 
 ## Was bedeuten die wichtigsten Begriffe?
 
@@ -114,13 +116,13 @@ Sortieren bedeutet, die Werte in die richtige Reihenfolge zu bringen, zum Beispi
 
 Ein Vergleich bedeutet: Der Algorithmus prüft zwei Werte und entscheidet, welcher grösser oder kleiner ist.
 
-### Bewegung
+### Schreibzugriff
 
-Eine Bewegung bedeutet: Der Algorithmus verändert das Array. Das kann ein Tausch von zwei Werten sein oder, wie bei Insertion Sort, eine Verschiebung.
+Ein Schreibzugriff bedeutet: Der Algorithmus schreibt einen Wert in das Arbeitsarray. Eine Vertauschung benötigt zwei Schreibzugriffe. Insertion Sort und Merge Sort können Werte schreiben, ohne sie direkt zu vertauschen.
 
-### Berechnungs- und Schrittgenerierungszeit
+### Generierungszeit
 
-Die Berechnungs- und Schrittgenerierungszeit zeigt, wie lange SortLab gebraucht hat, um die Sortierung zu berechnen und alle Animationsschritte zu erzeugen. Sie ist kein reiner Algorithmus-Benchmark.
+Die Generierungszeit zeigt, wie lange SortLab gebraucht hat, um die Sortierung zu berechnen und alle Animationsereignisse in darstellbare Frames umzuwandeln. Sie ist kein reiner Algorithmus-Benchmark.
 
 ## Empfehlung zum Lernen
 
@@ -137,7 +139,7 @@ Die Balken bewegen sich, weil der Algorithmus Werte vergleicht und die Reihenfol
 
 ### Warum sind manche Algorithmen schneller?
 
-Manche Algorithmen brauchen weniger Vergleiche oder Bewegungen. Deshalb sind sie bei grösseren Arrays oft schneller.
+Manche Algorithmen brauchen weniger Vergleiche oder Schreibzugriffe. Deshalb sind sie bei grösseren Arrays oft schneller.
 
 ### Muss ich programmieren können?
 

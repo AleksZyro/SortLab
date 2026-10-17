@@ -1,112 +1,90 @@
-const baseStats = {
+const createStats = () => ({
   comparisons: 0,
-  moves: 0,
-  steps: 0
-};
-
-const cloneState = ({ array, compared = [], swapped = [], sorted = [], stats }) => ({
-  array: [...array],
-  compared: [...compared],
-  swapped: [...swapped],
-  sorted: [...sorted],
-  stats: { ...stats }
+  writes: 0,
+  swaps: 0
 });
 
-const sortedFromSet = (set) => Array.from(set).sort((left, right) => left - right);
-const sortedHead = (length) => Array.from({ length }, (_, index) => index);
-const sortedTail = (array, length) =>
-  Array.from({ length }, (_, offset) => array.length - 1 - offset);
+const sortedRange = (length) => Array.from({ length }, (_, index) => index);
+const sortedTail = (length, count) =>
+  Array.from({ length: count }, (_, offset) => length - count + offset);
 
-const markAllSorted = (array, stats) =>
-  cloneState({
-    array,
-    sorted: sortedHead(array.length),
-    stats
-  });
+const createInstrumentation = (source, { captureEvents = true } = {}) => {
+  const array = [...source];
+  const stats = createStats();
+  const events = [];
 
-const pushFinalStateIfNeeded = (steps, array, stats) => {
-  if (steps.length === 0) {
-    return [markAllSorted(array, stats)];
-  }
-
-  const lastStep = steps[steps.length - 1];
-  const allSorted = sortedHead(array.length);
-  const alreadyComplete =
-    lastStep.sorted.length === allSorted.length &&
-    lastStep.sorted.every((value, index) => value === allSorted[index]);
-
-  if (!alreadyComplete) {
-    steps.push(markAllSorted(array, stats));
-  }
-
-  return steps;
-};
-
-const createRecorder = (array, stats, { recordSteps = true, getSorted = () => [] } = {}) => {
-  const steps = recordSteps ? [cloneState({ array, stats })] : [];
-
-  const push = (overrides = {}) => {
-    if (!recordSteps) {
+  const emit = (type, indices = [], sortedIndices = []) => {
+    if (!captureEvents) {
       return;
     }
 
-    steps.push(
-      cloneState({
-        array,
-        sorted: getSorted(),
-        stats,
-        ...overrides
-      })
-    );
+    events.push({
+      type,
+      indices: [...indices],
+      sortedIndices: [...sortedIndices].sort((left, right) => left - right),
+      array: [...array],
+      stats: { ...stats }
+    });
   };
 
   return {
-    steps,
-    push,
-    finish: () => pushFinalStateIfNeeded(steps, array, stats)
+    array,
+    stats,
+    events,
+    compare(indices, sortedIndices = []) {
+      stats.comparisons += 1;
+      emit('compare', indices, sortedIndices);
+    },
+    swap(leftIndex, rightIndex, sortedIndices = []) {
+      if (leftIndex === rightIndex) {
+        return;
+      }
+
+      [array[leftIndex], array[rightIndex]] = [array[rightIndex], array[leftIndex]];
+      stats.swaps += 1;
+      stats.writes += 2;
+      emit('swap', [leftIndex, rightIndex], sortedIndices);
+    },
+    write(index, value, sortedIndices = []) {
+      array[index] = value;
+      stats.writes += 1;
+      emit('write', [index], sortedIndices);
+    },
+    mark(sortedIndices) {
+      emit('mark', [], sortedIndices);
+    },
+    finish() {
+      emit('complete', [], sortedRange(array.length));
+
+      return {
+        result: [...array],
+        stats: { ...stats },
+        events
+      };
+    }
   };
 };
 
-const countComparison = (stats) => {
-  stats.comparisons += 1;
-  stats.steps += 1;
-};
-
-const countMove = (stats) => {
-  stats.moves += 1;
-  stats.steps += 1;
-};
-
-const bubbleSort = (source, options = {}) => {
-  const array = [...source];
-  const stats = { ...baseStats };
-  const recorder = createRecorder(array, stats, options);
+const bubbleSort = (source, options) => {
+  const recorder = createInstrumentation(source, options);
+  const { array } = recorder;
 
   for (let end = array.length - 1; end > 0; end -= 1) {
-    let swappedInPass = false;
+    let changed = false;
+    const finalizedCount = array.length - 1 - end;
 
     for (let index = 0; index < end; index += 1) {
-      countComparison(stats);
-      recorder.push({
-        compared: [index, index + 1],
-        sorted: sortedTail(array, array.length - 1 - end)
-      });
+      const sortedIndices = sortedTail(array.length, finalizedCount);
+      recorder.compare([index, index + 1], sortedIndices);
 
       if (array[index] > array[index + 1]) {
-        [array[index], array[index + 1]] = [array[index + 1], array[index]];
-        countMove(stats);
-        swappedInPass = true;
-        recorder.push({
-          compared: [index, index + 1],
-          swapped: [index, index + 1],
-          sorted: sortedTail(array, array.length - 1 - end)
-        });
+        recorder.swap(index, index + 1, sortedIndices);
+        changed = true;
       }
     }
 
-    recorder.push({ sorted: sortedTail(array, array.length - end) });
-
-    if (!swappedInPass) {
+    recorder.mark(sortedTail(array.length, array.length - end));
+    if (!changed) {
       break;
     }
   }
@@ -114,129 +92,125 @@ const bubbleSort = (source, options = {}) => {
   return recorder.finish();
 };
 
-const selectionSort = (source, options = {}) => {
-  const array = [...source];
-  const stats = { ...baseStats };
-  const recorder = createRecorder(array, stats, options);
+const selectionSort = (source, options) => {
+  const recorder = createInstrumentation(source, options);
+  const { array } = recorder;
 
   for (let start = 0; start < array.length; start += 1) {
-    let minIndex = start;
+    let minimumIndex = start;
 
     for (let index = start + 1; index < array.length; index += 1) {
-      countComparison(stats);
-      recorder.push({
-        compared: [minIndex, index],
-        sorted: sortedHead(start)
-      });
-
-      if (array[index] < array[minIndex]) {
-        minIndex = index;
+      recorder.compare([minimumIndex, index], sortedRange(start));
+      if (array[index] < array[minimumIndex]) {
+        minimumIndex = index;
       }
     }
 
-    if (minIndex !== start) {
-      [array[start], array[minIndex]] = [array[minIndex], array[start]];
-      countMove(stats);
-      recorder.push({
-        swapped: [start, minIndex],
-        sorted: sortedHead(start)
-      });
-    }
-
-    recorder.push({ sorted: sortedHead(start + 1) });
+    recorder.swap(start, minimumIndex, sortedRange(start));
+    recorder.mark(sortedRange(start + 1));
   }
 
   return recorder.finish();
 };
 
-const insertionSort = (source, options = {}) => {
-  const array = [...source];
-  const stats = { ...baseStats };
-  const recorder = createRecorder(array, stats, options);
+const insertionSort = (source, options) => {
+  const recorder = createInstrumentation(source, options);
+  const { array } = recorder;
 
   for (let index = 1; index < array.length; index += 1) {
     const value = array[index];
     let position = index - 1;
 
-    recorder.push({
-      compared: [index],
-      sorted: sortedHead(index)
-    });
-
     while (position >= 0) {
-      countComparison(stats);
-      recorder.push({
-        compared: [position, position + 1],
-        sorted: sortedHead(index)
-      });
-
+      recorder.compare([position, position + 1], sortedRange(index));
       if (array[position] <= value) {
         break;
       }
 
-      array[position + 1] = array[position];
-      countMove(stats);
-      recorder.push({
-        swapped: [position, position + 1],
-        sorted: sortedHead(index)
-      });
-
+      recorder.write(position + 1, array[position], sortedRange(index));
       position -= 1;
     }
 
-    const targetPosition = position + 1;
-    const movedToNewPosition = targetPosition !== index;
-
-    if (movedToNewPosition) {
-      array[targetPosition] = value;
-      countMove(stats);
+    const targetIndex = position + 1;
+    if (targetIndex !== index) {
+      recorder.write(targetIndex, value, sortedRange(index + 1));
+    } else {
+      recorder.mark(sortedRange(index + 1));
     }
-
-    recorder.push({
-      swapped: movedToNewPosition ? [targetPosition] : [],
-      sorted: sortedHead(index + 1)
-    });
   }
 
   return recorder.finish();
 };
 
-const quickSort = (source, options = {}) => {
-  const array = [...source];
-  const stats = { ...baseStats };
+const mergeSort = (source, options) => {
+  const recorder = createInstrumentation(source, options);
+  const { array } = recorder;
+  const auxiliary = [...array];
+
+  const merge = (start, middle, end) => {
+    for (let index = start; index <= end; index += 1) {
+      auxiliary[index] = array[index];
+    }
+
+    let leftIndex = start;
+    let rightIndex = middle + 1;
+
+    for (let writeIndex = start; writeIndex <= end; writeIndex += 1) {
+      if (leftIndex > middle) {
+        recorder.write(writeIndex, auxiliary[rightIndex]);
+        rightIndex += 1;
+      } else if (rightIndex > end) {
+        recorder.write(writeIndex, auxiliary[leftIndex]);
+        leftIndex += 1;
+      } else {
+        recorder.compare([leftIndex, rightIndex]);
+        if (auxiliary[leftIndex] <= auxiliary[rightIndex]) {
+          recorder.write(writeIndex, auxiliary[leftIndex]);
+          leftIndex += 1;
+        } else {
+          recorder.write(writeIndex, auxiliary[rightIndex]);
+          rightIndex += 1;
+        }
+      }
+    }
+  };
+
+  const sort = (start, end) => {
+    if (start >= end) {
+      return;
+    }
+
+    const middle = Math.floor((start + end) / 2);
+    sort(start, middle);
+    sort(middle + 1, end);
+    merge(start, middle, end);
+  };
+
+  sort(0, array.length - 1);
+  return recorder.finish();
+};
+
+const quickSort = (source, options) => {
+  const recorder = createInstrumentation(source, options);
+  const { array } = recorder;
   const finalized = new Set();
-  const recorder = createRecorder(array, stats, {
-    ...options,
-    getSorted: () => sortedFromSet(finalized)
-  });
+  const finalizedIndices = () => Array.from(finalized);
 
   const partition = (low, high) => {
     const pivotValue = array[high];
     let storeIndex = low;
 
     for (let index = low; index < high; index += 1) {
-      countComparison(stats);
-      recorder.push({ compared: [index, high] });
-
+      recorder.compare([index, high], finalizedIndices());
       if (array[index] < pivotValue) {
-        if (index !== storeIndex) {
-          [array[index], array[storeIndex]] = [array[storeIndex], array[index]];
-          countMove(stats);
-          recorder.push({ compared: [index, high], swapped: [index, storeIndex] });
-        }
-
+        recorder.swap(index, storeIndex, finalizedIndices());
         storeIndex += 1;
       }
     }
 
-    if (storeIndex !== high) {
-      [array[storeIndex], array[high]] = [array[high], array[storeIndex]];
-      countMove(stats);
-      recorder.push({ swapped: [storeIndex, high] });
-    }
-
+    recorder.swap(storeIndex, high, finalizedIndices());
     finalized.add(storeIndex);
-    recorder.push();
+    recorder.mark(finalizedIndices());
     return storeIndex;
   };
 
@@ -247,7 +221,7 @@ const quickSort = (source, options = {}) => {
 
     if (low === high) {
       finalized.add(low);
-      recorder.push();
+      recorder.mark(finalizedIndices());
       return;
     }
 
@@ -260,36 +234,29 @@ const quickSort = (source, options = {}) => {
   return recorder.finish();
 };
 
-const heapSort = (source, options = {}) => {
-  const array = [...source];
-  const stats = { ...baseStats };
+const heapSort = (source, options) => {
+  const recorder = createInstrumentation(source, options);
+  const { array } = recorder;
   const finalized = new Set();
-  const recorder = createRecorder(array, stats, {
-    ...options,
-    getSorted: () => sortedFromSet(finalized)
-  });
+  const finalizedIndices = () => Array.from(finalized);
 
   const heapify = (heapSize, rootIndex) => {
     let currentRoot = rootIndex;
 
     while (true) {
-      const leftChild = (currentRoot * 2) + 1;
+      const leftChild = currentRoot * 2 + 1;
       const rightChild = leftChild + 1;
       let largest = currentRoot;
 
       if (leftChild < heapSize) {
-        countComparison(stats);
-        recorder.push({ compared: [largest, leftChild] });
-
+        recorder.compare([largest, leftChild], finalizedIndices());
         if (array[leftChild] > array[largest]) {
           largest = leftChild;
         }
       }
 
       if (rightChild < heapSize) {
-        countComparison(stats);
-        recorder.push({ compared: [largest, rightChild] });
-
+        recorder.compare([largest, rightChild], finalizedIndices());
         if (array[rightChild] > array[largest]) {
           largest = rightChild;
         }
@@ -299,9 +266,7 @@ const heapSort = (source, options = {}) => {
         return;
       }
 
-      [array[currentRoot], array[largest]] = [array[largest], array[currentRoot]];
-      countMove(stats);
-      recorder.push({ swapped: [currentRoot, largest] });
+      recorder.swap(currentRoot, largest, finalizedIndices());
       currentRoot = largest;
     }
   };
@@ -311,15 +276,15 @@ const heapSort = (source, options = {}) => {
   }
 
   for (let end = array.length - 1; end > 0; end -= 1) {
-    [array[0], array[end]] = [array[end], array[0]];
-    countMove(stats);
+    recorder.swap(0, end, finalizedIndices());
     finalized.add(end);
-    recorder.push({ swapped: [0, end] });
+    recorder.mark(finalizedIndices());
     heapify(end, 0);
   }
 
   if (array.length > 0) {
     finalized.add(0);
+    recorder.mark(finalizedIndices());
   }
 
   return recorder.finish();
@@ -329,69 +294,36 @@ export const algorithmMap = {
   bubble: bubbleSort,
   selection: selectionSort,
   insertion: insertionSort,
+  merge: mergeSort,
   quick: quickSort,
   heap: heapSort
 };
 
+export const algorithmKeys = Object.keys(algorithmMap);
+
+export const runAlgorithm = (algorithmKey, source, options = {}) => {
+  const algorithm = algorithmMap[algorithmKey];
+  if (!algorithm) {
+    throw new Error(`Unbekannter Sortieralgorithmus: ${algorithmKey}`);
+  }
+
+  const run = algorithm(source, options);
+  return {
+    algorithmKey,
+    input: [...source],
+    ...run
+  };
+};
+
 export const summarizeAlgorithmRun = (algorithmKey, source) => {
   const start = performance.now();
-  const [finalState] = algorithmMap[algorithmKey](source, { recordSteps: false });
+  const run = runAlgorithm(algorithmKey, source, { captureEvents: false });
   const end = performance.now();
 
   return {
     key: algorithmKey,
-    comparisons: finalState.stats.comparisons,
-    moves: finalState.stats.moves,
-    steps: finalState.stats.steps,
-    generationTimeMs: Number((end - start).toFixed(2)),
-    resultArray: finalState.array
+    ...run.stats,
+    runtimeMs: Number((end - start).toFixed(2)),
+    resultArray: run.result
   };
-};
-
-export const algorithmContent = {
-  bubble: {
-    title: 'Bubble Sort',
-    summary:
-      'Bubble Sort vergleicht benachbarte Elemente und verschiebt grössere Werte Schritt für Schritt nach rechts.',
-    bestCase: 'O(n) bei bereits sortiertem Array',
-    averageCase: 'O(n²)',
-    worstCase: 'O(n²)',
-    stability: 'Stabil'
-  },
-  selection: {
-    title: 'Selection Sort',
-    summary:
-      'Selection Sort sucht in jedem Durchlauf das kleinste verbleibende Element und setzt es an die nächste freie Position.',
-    bestCase: 'O(n²)',
-    averageCase: 'O(n²)',
-    worstCase: 'O(n²)',
-    stability: 'Nicht stabil'
-  },
-  insertion: {
-    title: 'Insertion Sort',
-    summary:
-      'Insertion Sort baut schrittweise einen sortierten Bereich auf und fügt jedes neue Element an der passenden Stelle ein.',
-    bestCase: 'O(n) bei fast sortierten Daten',
-    averageCase: 'O(n²)',
-    worstCase: 'O(n²)',
-    stability: 'Stabil'
-  },
-  quick: {
-    title: 'Quick Sort',
-    summary:
-      'Quick Sort wählt ein Pivot-Element, teilt das Array in kleinere und grössere Werte auf und sortiert diese Teilbereiche rekursiv.',
-    bestCase: 'O(n log n)',
-    averageCase: 'O(n log n)',
-    worstCase: 'O(n²)',
-    stability: 'Nicht stabil'
-  },
-  heap: {
-    title: 'Heap Sort',
-    summary:
-      'Heap Sort baut zuerst einen Max-Heap auf und verschiebt danach das jeweils grösste Element an das Ende des Arrays.',
-    bestCase: 'O(n log n)',
-    averageCase: 'O(n log n)',
-    worstCase: 'O(n log n)',
-    stability: 'Nicht stabil'
-  }
 };

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { algorithmMap } from './sortAlgorithms';
+import { algorithmKeys, runAlgorithm } from './sortAlgorithms';
 
 const cases = [
   { name: 'empty array', input: [], expected: [] },
@@ -10,73 +10,75 @@ const cases = [
   { name: 'negative values', input: [3, -1, 0, -5, 2], expected: [-5, -1, 0, 2, 3] }
 ];
 
-const finalStateOf = (steps) => steps[steps.length - 1];
-
-describe.each(Object.entries(algorithmMap))('%s sort', (_name, sort) => {
-  it.each(cases)('sorts $name', ({ input, expected }) => {
+describe.each(algorithmKeys)('%s sort', (algorithmKey) => {
+  it.each(cases)('sorts $name without mutating the input', ({ input, expected }) => {
     const original = [...input];
-    const steps = sort(input);
-    const finalState = finalStateOf(steps);
+    const run = runAlgorithm(algorithmKey, input);
 
-    expect(finalState.array).toEqual(expected);
+    expect(run.result).toEqual(expected);
     expect(input).toEqual(original);
-    expect(finalState.sorted).toEqual(expected.map((_, index) => index));
-    expect(finalState.stats).toEqual(
+    expect(run.events.at(-1)).toEqual(
       expect.objectContaining({
-        comparisons: expect.any(Number),
-        moves: expect.any(Number),
-        steps: expect.any(Number)
+        type: 'complete',
+        array: expected,
+        sortedIndices: expected.map((_, index) => index)
       })
     );
+    expect(run.stats).toEqual({
+      comparisons: expect.any(Number),
+      writes: expect.any(Number),
+      swaps: expect.any(Number)
+    });
   });
 });
 
-describe('statistics', () => {
-  it('counts Bubble Sort swaps as movements', () => {
-    const finalState = finalStateOf(algorithmMap.bubble([2, 1]));
-
-    expect(finalState.array).toEqual([1, 2]);
-    expect(finalState.stats.moves).toBe(1);
-    expect(finalState.stats.comparisons).toBe(1);
+describe('operation statistics', () => {
+  it.each([
+    ['bubble', { comparisons: 1, writes: 2, swaps: 1 }],
+    ['selection', { comparisons: 1, writes: 2, swaps: 1 }],
+    ['merge', { comparisons: 1, writes: 2, swaps: 0 }],
+    ['quick', { comparisons: 1, writes: 2, swaps: 1 }],
+    ['heap', { comparisons: 1, writes: 2, swaps: 1 }]
+  ])('reports deterministic metrics for %s', (algorithmKey, expectedStats) => {
+    expect(runAlgorithm(algorithmKey, [2, 1]).stats).toEqual(expectedStats);
   });
 
-  it('counts Selection Sort swaps as movements', () => {
-    const finalState = finalStateOf(algorithmMap.selection([2, 1]));
-
-    expect(finalState.array).toEqual([1, 2]);
-    expect(finalState.stats.moves).toBe(1);
-    expect(finalState.stats.comparisons).toBe(1);
+  it('counts Insertion Sort shifts and inserts as writes', () => {
+    expect(runAlgorithm('insertion', [3, 2, 1]).stats).toEqual({
+      comparisons: 3,
+      writes: 5,
+      swaps: 0
+    });
   });
 
-  it('counts Insertion Sort shifts and inserts as movements', () => {
-    const finalState = finalStateOf(algorithmMap.insertion([3, 2, 1]));
+  it('does not count unchanged Insertion Sort positions as writes', () => {
+    expect(runAlgorithm('insertion', [1, 2, 3]).stats).toEqual({
+      comparisons: 2,
+      writes: 0,
+      swaps: 0
+    });
+  });
+});
 
-    expect(finalState.array).toEqual([1, 2, 3]);
-    expect(finalState.stats.moves).toBe(5);
-    expect(finalState.stats.comparisons).toBe(3);
+describe('algorithm event contract', () => {
+  it('can skip event capture for comparison benchmarks', () => {
+    const run = runAlgorithm('merge', [3, 1, 2], { captureEvents: false });
+
+    expect(run.events).toEqual([]);
+    expect(run.result).toEqual([1, 2, 3]);
+    expect(run.stats.comparisons).toBeGreaterThan(0);
   });
 
-  it('does not count unchanged Insertion Sort insert positions as movements', () => {
-    const finalState = finalStateOf(algorithmMap.insertion([1, 2, 3]));
+  it('emits immutable snapshots with supported event types', () => {
+    const run = runAlgorithm('bubble', [2, 1]);
+    const supportedTypes = ['compare', 'swap', 'write', 'mark', 'complete'];
 
-    expect(finalState.array).toEqual([1, 2, 3]);
-    expect(finalState.stats.moves).toBe(0);
-    expect(finalState.stats.comparisons).toBe(2);
+    expect(run.events.every((event) => supportedTypes.includes(event.type))).toBe(true);
+    expect(run.events[0].array).toEqual([2, 1]);
+    expect(run.events.at(-1).array).toEqual([1, 2]);
   });
 
-  it('counts Quick Sort swaps as movements', () => {
-    const finalState = finalStateOf(algorithmMap.quick([2, 1]));
-
-    expect(finalState.array).toEqual([1, 2]);
-    expect(finalState.stats.moves).toBe(1);
-    expect(finalState.stats.comparisons).toBe(1);
-  });
-
-  it('counts Heap Sort swaps as movements', () => {
-    const finalState = finalStateOf(algorithmMap.heap([2, 1]));
-
-    expect(finalState.array).toEqual([1, 2]);
-    expect(finalState.stats.moves).toBe(1);
-    expect(finalState.stats.comparisons).toBe(1);
+  it('rejects unknown algorithm keys', () => {
+    expect(() => runAlgorithm('bogus', [2, 1])).toThrow('Unbekannter Sortieralgorithmus');
   });
 });

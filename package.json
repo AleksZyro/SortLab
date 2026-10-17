@@ -1,8 +1,8 @@
 {
   "name": "sortlab",
   "private": true,
-  "version": "0.0.0",
-  "description": "Interactive React sorting algorithm visualizer for Bubble Sort, Quick Sort, Heap Sort and algorithm comparisons.",
+  "version": "1.0.0",
+  "description": "Interactive React sorting algorithm visualizer with synchronised algorithm comparisons.",
   "author": "Aleksandar Nikolic",
   "license": "MIT",
   "repository": {
@@ -24,6 +24,10 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "check": "npm run format:check && npm run lint && npm test && npm run build",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint . --max-warnings=0",
     "test": "vitest run",
     "preview": "vite preview"
   },
@@ -32,7 +36,13 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@vitejs/plugin-react": "^6.0.5",
+    "eslint": "^10.12.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.4.26",
+    "globals": "^16.5.0",
+    "prettier": "^3.9.10",
     "vite": "^8.2.0",
     "vitest": "^4.1.10"
   }
