@@ -51,7 +51,7 @@ export const algorithmContent = {
     title: 'Heap Sort',
     summary:
       'Baut einen Max-Heap auf und verschiebt das grösste Element wiederholt ans Array-Ende.',
-    bestCase: 'O(n log n)',
+    bestCase: 'O(n)',
     averageCase: 'O(n log n)',
     worstCase: 'O(n log n)',
     spaceComplexity: 'O(1)',
